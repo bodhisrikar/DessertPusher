@@ -29,8 +29,11 @@ import androidx.lifecycle.LifecycleObserver
 import com.example.android.dessertpusher.databinding.ActivityMainBinding
 import timber.log.Timber
 
-class MainActivity : AppCompatActivity(), LifecycleObserver {
+private const val KEY_REVENUE = "key_revenue"
+private const val KEY_DESSERTS_SOLD = "key_desserts_sold"
+private const val KEY_DESSERT_TIMER_COUNT = "key_dessert_timer_count"
 
+class MainActivity : AppCompatActivity(), LifecycleObserver {
     private var revenue = 0
     private var dessertsSold = 0
 
@@ -74,11 +77,17 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
         binding.dessertButton.setOnClickListener {
             onDessertClicked()
         }
+        dessertTimer = DessertTimer(this.lifecycle)
+
+        if (null != savedInstanceState) {
+            revenue = savedInstanceState.getInt(KEY_REVENUE)
+            dessertsSold = savedInstanceState.getInt(KEY_DESSERTS_SOLD)
+            dessertTimer.secondsCount = savedInstanceState.getInt(KEY_DESSERT_TIMER_COUNT)
+        }
 
         // Set the TextViews to the right values
         binding.revenue = revenue
         binding.amountSold = dessertsSold
-        dessertTimer = DessertTimer(this.lifecycle)
 
         // Make sure the correct dessert is showing
         binding.dessertButton.setImageResource(currentDessert.imageId)
@@ -94,6 +103,11 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
         Timber.i("onRestart called")
     }
 
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        Timber.i("onRestoreInstanceState called")
+    }
+
     override fun onPause() {
         super.onPause()
         Timber.i("onPause called")
@@ -107,6 +121,14 @@ class MainActivity : AppCompatActivity(), LifecycleObserver {
     override fun onStop() {
         super.onStop()
         Timber.i("onStop called")
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        Timber.i("onSaveInstanceState called")
+        outState.putInt(KEY_REVENUE, revenue)
+        outState.putInt(KEY_DESSERTS_SOLD, dessertsSold)
+        outState.putInt(KEY_DESSERT_TIMER_COUNT, dessertTimer.secondsCount)
     }
 
     override fun onDestroy() {
